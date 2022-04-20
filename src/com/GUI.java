@@ -2,15 +2,16 @@ package com;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GUI extends JFrame implements ActionListener
 {
@@ -158,23 +159,60 @@ public class GUI extends JFrame implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e) {
         switch (e.getActionCommand()) {
-            case "saveFile":
-                saveInvoice();
-                break;
+            case "saveFile" -> saveInvoice();
+            case "loadFile" -> loadInvoice();
+            default -> {
+            }
         }
 
     }
 
-    private void loadInvoices() {
+    private void loadInvoice(){
+        JFileChooser fc = new JFileChooser();
+        fc.setAcceptAllFileFilterUsed(false);
+        FileNameExtensionFilter restrict = new FileNameExtensionFilter("Only .csv files", "csv");
+        fc.addChoosableFileFilter(restrict);
+        int result = fc.showOpenDialog(this);
+
+        if(result == JFileChooser.APPROVE_OPTION){
+            String path = fc.getSelectedFile().getPath();
+
+            String line = "";
+            try
+            {
+                BufferedReader br = new BufferedReader(new FileReader(path));
+                String[][] data = new String[5][100];
+                int i =0;
+                while ((line = br.readLine()) != null)
+                {
+                    String[] arr = line.split(",");
+                    for(int j = 0; j < arr.length; j++){
+                        data[i][j] = arr[j];
+                    }
+                    i++;
+                }
+                invoiceDetailsTable.setModel(new DefaultTableModel(data,invoiceDetailsTableColumns));
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }    //closes the scanner
+        }
 
     }
 
     private void saveInvoice() {
         JFileChooser fc = new JFileChooser();
-        fc.setDialogTitle("Specify a file save");
+        fc.setDialogTitle("Save your invoice");
+
+        fc.setAcceptAllFileFilterUsed(false);
+        FileNameExtensionFilter restrict = new FileNameExtensionFilter("Only .csv files", "csv");
+        fc.addChoosableFileFilter(restrict);
+
         int result = fc.showSaveDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
             File csvFile = fc.getSelectedFile();
+            System.out.println(csvFile.getName());
 
             FileWriter fw = null;
             BufferedWriter bw = null;
