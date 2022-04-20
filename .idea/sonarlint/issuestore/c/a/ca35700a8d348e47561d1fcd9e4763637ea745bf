@@ -1,0 +1,16 @@
+
+œ
+java:S1186"€Add a nested comment explaining why this method is empty, throw an UnsupportedOperationException or complete the implementation.(¼ Òþüÿÿÿÿ
+]	java:S125"<This block of commented-out lines of code should be removed.(æ È–øÿÿÿÿ8«Š“·„0
+O
+java:S1135!"2Complete the task associated to this TODO comment.(¡ç‚Ï8‹þ–·„0
+N
+java:S1068
+"1Remove this unused "invoicesTable" private field.(À–›8‹þ–·„0
+H
+java:S1068"+Remove this unused "button1" private field.(Ý¢ÈÒ8¥–•·„0
+H
+java:S1068"+Remove this unused "button2" private field.(”µ±‘8½§•·„0
+Y
+java:S1144 "7Remove this unused private "createUIComponents" method.(Á›°çýÿÿÿÿ8Œþ–·„0
+b	java:S101"MRename this class name to match the regular expression '^[A-Z][a-zA-Z0-9]*$'.(¯ê‰÷
