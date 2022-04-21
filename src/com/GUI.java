@@ -22,6 +22,7 @@ public class GUI extends JFrame implements ActionListener, MouseListener
     // Left Panel
     private JPanel leftPanel;
 
+    private DefaultTableModel invoicesTableModel;
     private JTable invoicesTable;
     private String[] invoicesTableColumns = {"No.", "Date", "Customer", "Total"};
     private String[][] invoicesTableData = csvToArray("src/InvoiceHeader.csv", false);
@@ -38,9 +39,7 @@ public class GUI extends JFrame implements ActionListener, MouseListener
 
     private int invoiceTotal;
 
-
-    // put the Panel here
-
+    DefaultTableModel invoiceDetailsTableModel;
     private JTable invoiceDetailsTable;
     private String[] invoiceDetailsTableColumns = {"No.", "Item Name", "Item Price", "Count", "Item Total"};
     private String[][] invoiceDetailsData = csvToArray("src/InvoiceLine.csv", true);
@@ -79,7 +78,8 @@ public class GUI extends JFrame implements ActionListener, MouseListener
         //++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         //Left Panel
-        invoicesTable = new JTable(invoicesTableData, invoicesTableColumns);
+        invoicesTableModel = new DefaultTableModel(invoicesTableData, invoicesTableColumns);
+        invoicesTable = new JTable(invoicesTableModel);
         invoicesTable.addMouseListener(this);
         JScrollPane invoicesTableSP = new JScrollPane(invoicesTable);
         invoicesTableSP.setBounds(20,30,400,540);
@@ -91,6 +91,8 @@ public class GUI extends JFrame implements ActionListener, MouseListener
 
         deleteInvoiceButton = new JButton("Delete Invoice");
         deleteInvoiceButton.setBounds(230, 590, 150,20);
+        deleteInvoiceButton.addActionListener(this);
+        deleteInvoiceButton.setActionCommand("deleteInvoice");
         add(deleteInvoiceButton);
 
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -128,7 +130,8 @@ public class GUI extends JFrame implements ActionListener, MouseListener
         getContentPane().add(rightPanel, BorderLayout.CENTER);
         add(rightPanel);
 
-        invoiceDetailsTable = new JTable(invoiceDetailsData, invoiceDetailsTableColumns);
+        invoiceDetailsTableModel = new DefaultTableModel(invoiceDetailsData, invoiceDetailsTableColumns);
+        invoiceDetailsTable = new JTable(invoiceDetailsTableModel);
         JScrollPane invoiceDetailsTableSP = new JScrollPane(invoiceDetailsTable);
         invoiceDetailsTableSP.setBounds(10,20,380,370);
         rightPanel.add(invoiceDetailsTableSP, BorderLayout.CENTER);
@@ -149,6 +152,7 @@ public class GUI extends JFrame implements ActionListener, MouseListener
         switch (e.getActionCommand()) {
             case "saveFile" -> saveInvoice();
             case "loadFile" -> loadInvoice();
+            case "deleteInvoice" -> deleteInvoice();
             default -> {
             }
         }
@@ -158,8 +162,7 @@ public class GUI extends JFrame implements ActionListener, MouseListener
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        int row = invoicesTable.getSelectedRow();
-        System.out.println(row);
+
     }
 
     @Override
@@ -218,7 +221,7 @@ public class GUI extends JFrame implements ActionListener, MouseListener
             try {
                 fw = new FileWriter(csvFile);
                 bw = new BufferedWriter(fw);
-
+                
                 // Iterate over each cell of the table
                 for (int i = 0; i < invoiceDetailsTable.getRowCount(); i++) {
                     for (int j = 0; j < invoiceDetailsTable.getColumnCount(); j++) {
@@ -243,7 +246,10 @@ public class GUI extends JFrame implements ActionListener, MouseListener
         }
     }
 
-
+    private void deleteInvoice() {
+        int row = invoicesTable.getSelectedRow();
+        invoicesTableModel.removeRow(row);
+    }
 
     private String[][] csvToArray(String path, boolean details){
 
