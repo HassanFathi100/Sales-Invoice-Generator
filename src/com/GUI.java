@@ -6,14 +6,10 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 
-public class GUI extends JFrame implements ActionListener
+public class GUI extends JFrame implements ActionListener, MouseListener
 {
     // Menu Bar
     private JMenuBar menuBar;
@@ -28,11 +24,7 @@ public class GUI extends JFrame implements ActionListener
 
     private JTable invoicesTable;
     private String[] invoicesTableColumns = {"No.", "Date", "Customer", "Total"};
-    private String[][] invoicesTableData = {
-            {"1" , "2" , "3", "4"},
-            {"1" , "2" , "3", "4"},
-            {"1" , "2" , "3", "4"}
-    };
+    private String[][] invoicesTableData = csvToArray("src/InvoiceHeader.csv", false);
 
     private JButton newInvoiceButton;
     private JButton deleteInvoiceButton;
@@ -51,15 +43,10 @@ public class GUI extends JFrame implements ActionListener
 
     private JTable invoiceDetailsTable;
     private String[] invoiceDetailsTableColumns = {"No.", "Item Name", "Item Price", "Count", "Item Total"};
-    private String[][] invoiceDetailsData = {
-            {"1" , "2" , "3", "4", "5"},
-            {"1" , "2" , "3", "4", "5"},
-            {"1" , "2" , "3", "4", "5"}
-    };
+    private String[][] invoiceDetailsData = csvToArray("src/InvoiceLine.csv", true);
 
     private JButton saveButton;
     private JButton cancelButton;
-
 
 
     public GUI(){
@@ -93,6 +80,7 @@ public class GUI extends JFrame implements ActionListener
 
         //Left Panel
         invoicesTable = new JTable(invoicesTableData, invoicesTableColumns);
+        invoicesTable.addMouseListener(this);
         JScrollPane invoicesTableSP = new JScrollPane(invoicesTable);
         invoicesTableSP.setBounds(20,30,400,540);
         add(invoicesTableSP);
@@ -128,7 +116,7 @@ public class GUI extends JFrame implements ActionListener
         customerNameTF.setBounds(540,100, 300, 20);
         add(customerNameTF);
 
-        JLabel invoiceTotalLabel = new JLabel("Invoice Total" + invoiceTotal);
+        JLabel invoiceTotalLabel = new JLabel("Invoice Total: " + invoiceTotal);
         invoiceTotalLabel.setBounds(440,140, 400, 20);
         add(invoiceTotalLabel);
 
@@ -152,12 +140,12 @@ public class GUI extends JFrame implements ActionListener
         cancelButton = new JButton("Cancel");
         cancelButton.setBounds(670,590,100,20);
         add(cancelButton);
-
-
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        var i = invoicesTable.getSelectedRow();
+        System.out.println(i);
         switch (e.getActionCommand()) {
             case "saveFile" -> saveInvoice();
             case "loadFile" -> loadInvoice();
@@ -167,36 +155,46 @@ public class GUI extends JFrame implements ActionListener
 
     }
 
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        int row = invoicesTable.getSelectedRow();
+        System.out.println(row);
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+
+    }
+
     private void loadInvoice(){
         JFileChooser fc = new JFileChooser();
         fc.setAcceptAllFileFilterUsed(false);
-        FileNameExtensionFilter restrict = new FileNameExtensionFilter("Only .csv files", "csv");
+        FileNameExtensionFilter restrict = new FileNameExtensionFilter("Comma Separated Values (.csv)", "csv");
         fc.addChoosableFileFilter(restrict);
+
         int result = fc.showOpenDialog(this);
 
         if(result == JFileChooser.APPROVE_OPTION){
             String path = fc.getSelectedFile().getPath();
+            String[][] data = csvToArray(path, true);
 
-            String line = "";
-            try
-            {
-                BufferedReader br = new BufferedReader(new FileReader(path));
-                String[][] data = new String[5][100];
-                int i =0;
-                while ((line = br.readLine()) != null)
-                {
-                    String[] arr = line.split(",");
-                    for(int j = 0; j < arr.length; j++){
-                        data[i][j] = arr[j];
-                    }
-                    i++;
-                }
-                invoiceDetailsTable.setModel(new DefaultTableModel(data,invoiceDetailsTableColumns));
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }    //closes the scanner
+            invoiceDetailsTable.setModel(new DefaultTableModel(data,invoiceDetailsTableColumns));
         }
 
     }
@@ -206,7 +204,7 @@ public class GUI extends JFrame implements ActionListener
         fc.setDialogTitle("Save your invoice");
 
         fc.setAcceptAllFileFilterUsed(false);
-        FileNameExtensionFilter restrict = new FileNameExtensionFilter("Only .csv files", "csv");
+        FileNameExtensionFilter restrict = new FileNameExtensionFilter("Comma Separated Values (.csv)", "csv");
         fc.addChoosableFileFilter(restrict);
 
         int result = fc.showSaveDialog(this);
@@ -243,6 +241,40 @@ public class GUI extends JFrame implements ActionListener
 
             }
         }
+    }
+
+
+
+    private String[][] csvToArray(String path, boolean details){
+
+        String line = "";
+        BufferedReader br = null;
+        String[][] data = new String[5][100];
+        try {
+            br = new BufferedReader(new FileReader(path));
+            int i =0;
+            while ((line = br.readLine()) != null)
+            {
+                String[] arr = line.split(",");
+                System.arraycopy(arr, 0, data[i], 0, arr.length);
+                i++;
+            }
+
+            if(details){
+                for(int j = 0; j < 5; j++) {
+                    data[j][4] = Integer.toString(Integer.parseInt(data[j][3]) * Integer.parseInt(data[j][2]));
+                    invoiceTotal += Integer.parseInt(data[j][4]);
+                }
+            }
+
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return data;
     }
 
 }
